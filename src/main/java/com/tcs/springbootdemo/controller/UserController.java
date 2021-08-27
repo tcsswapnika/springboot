@@ -2,9 +2,12 @@ package com.tcs.springbootdemo.controller;
 
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,44 +20,35 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tcs.springbootdemo.User;
+import com.tcs.springbootdemo.entity.User;
 import com.tcs.springbootdemo.exceptions.UserNotFoundException;
 import com.tcs.springbootdemo.service.IUserService;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {// spring bean, act as required receiver
-
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-
-	@Autowired
+	@Autowired // DI
 	IUserService userService;
 
-	@GetMapping()
-	public Iterable<User> getUser() {
+	@GetMapping
+	private Iterable<User> getUser() {
 		return userService.getAllUsers();
 	}
 
 	@GetMapping("/{id}")
 	private Optional<User> getUser(@PathVariable("id") Integer id) {
 		return userService.getUser(id);
-
 	}
 
-	@ExceptionHandler(value = UserNotFoundException.class)
-	public ResponseEntity<User> exception(UserNotFoundException userNotFoundException) {
+	@ExceptionHandler(value = { UserNotFoundException.class, IllegalStateException.class,
+			EmptyResultDataAccessException.class })
+	public ResponseEntity<User> exception(RuntimeException runtimeException) {
 		return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
 	}
 
-	@PutMapping // method+Path
-	private void updateUser(@RequestBody User user) {
-		userService.save(user);
-		logger.debug(user.getFirstName());
-
-	}
-
 	@PostMapping
-	public void saveUser(@RequestBody User user) {
+	private void saveUser(@RequestBody @Valid User user) {
 		userService.save(user);
 		logger.debug(user.getFirstName());
 	}
@@ -63,4 +57,11 @@ public class UserController {// spring bean, act as required receiver
 	public void deleteUser(@PathVariable("id") Integer id) {
 		userService.deleteUser(id);
 	}
+
+	@PutMapping("/{id}") // METHOD+Path
+	private void updateUser(@PathVariable("id") Integer id, @RequestBody User user) {
+		userService.update(user, id);
+		System.out.println(user.getFirstName());
+	}
+
 }
