@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tcs.springbootdemo.entity.User;
@@ -47,7 +48,8 @@ public class UserController {// spring bean, act as required receiver
 		return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
 	}
 
-	@PostMapping
+	@PostMapping 
+	@ResponseStatus(code = HttpStatus.CREATED)
 	private void saveUser(@RequestBody @Valid User user) {
 		userService.save(user);
 		logger.debug(user.getFirstName());

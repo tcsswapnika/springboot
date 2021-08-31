@@ -22,7 +22,7 @@ public class UserService implements IUserService {
 	public void save(User user) {
 		userRepository.save(user);
 		System.out.println("saved");
-		
+
 	}
 
 	@Override
@@ -48,12 +48,12 @@ public class UserService implements IUserService {
 	public void update(User user, Integer id) {
 		Optional<User> userFromDB = userRepository.findById(id);
 		User user1 = userFromDB.get();
-		if (user1.getId() != null) {
-
+		if (userFromDB.isPresent()) {
+				userFromDB.get().setEmail(user.getEmail());
 		}
-		if (StringUtils.hasText(user.getFirstName()))
-			user1.setFirstName(user.getFirstName());
-		userRepository.save(user1);
+//		if (StringUtils.hasText(user.getFirstName()))
+//			user1.setFirstName(user.getFirstName());
+		userRepository.save(userFromDB.get());
 	}
 
 }
